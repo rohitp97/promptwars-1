@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 
 interface StadiumMapProps {
@@ -5,10 +6,11 @@ interface StadiumMapProps {
   activeRoute?: string | null;
 }
 
-export function StadiumMap({ userSection, activeRoute }: StadiumMapProps) {
+export const StadiumMap = memo(function StadiumMap({ userSection, activeRoute }: StadiumMapProps) {
   return (
     <div className="relative w-full aspect-square max-w-sm mx-auto flex items-center justify-center p-4 bg-neutral-900/40 rounded-3xl border border-neutral-800 backdrop-blur-sm overflow-hidden">
-      <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-xl" xmlns="http://www.w3.org/2000/svg">
+      <svg role="img" aria-label="Stadium Map with dynamic routes" viewBox="0 0 200 200" className="w-full h-full drop-shadow-xl" xmlns="http://www.w3.org/2000/svg">
+        <title>Interactive Stadium Map showing {userSection} section</title>
         <defs>
           <radialGradient id="fieldGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
             <stop offset="0%" stopColor="#22c55e" stopOpacity="0.8"/>
@@ -151,4 +153,4 @@ export function StadiumMap({ userSection, activeRoute }: StadiumMapProps) {
       </div>
     </div>
   );
-}
+});

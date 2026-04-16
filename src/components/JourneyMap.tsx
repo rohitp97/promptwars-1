@@ -1,43 +1,47 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo } from "react";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { ExternalLink, Navigation, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 // M. Chinnaswamy Stadium Gate 4 Coordinates
 const GATE_4_COORDS = { lat: 12.9789, lng: 77.5972 }; // Queen's Road side (Gate 4)
 
-export function JourneyMap() {
+export const JourneyMap = memo(function JourneyMap() {
   const mapRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
   const [distance, setDistance] = useState<string | null>(null);
   const [duration, setDuration] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!navigator.geolocation) {
-      setErrorMsg("Geolocation is not supported by your browser.");
+    const handleGeoError = () => {
       setLoading(false);
-      return;
-    }
+      setErrorMsg(
+        "We couldn't access your location. Please check your browser permissions to calculate the journey."
+      );
+    };
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userLoc = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        initMap(userLoc);
-      },
-      (error) => {
+    const runGeo = async () => {
+      if (!navigator.geolocation) {
+        setErrorMsg("Geolocation is not supported by your browser.");
         setLoading(false);
-        setErrorMsg(
-          "We couldn't access your location. Please check your browser permissions to calculate the journey."
-        );
+        return;
       }
-    );
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userLoc = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          initMap(userLoc);
+        },
+        () => handleGeoError()
+      );
+    };
+
+    runGeo();
 
     const initMap = async (userLoc: { lat: number; lng: number }) => {
       try {
@@ -54,7 +58,6 @@ export function JourneyMap() {
             zoom: 14,
             disableDefaultUI: true,
           });
-          setMap(mapInstance);
 
           const directionsService = new DirectionsService();
           const directionsRenderer = new DirectionsRenderer({
@@ -150,4 +153,4 @@ export function JourneyMap() {
       )}
     </div>
   );
-}
+});

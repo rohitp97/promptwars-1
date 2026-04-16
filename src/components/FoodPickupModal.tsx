@@ -1,14 +1,6 @@
 import { X, MapPin, Coffee } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-export interface Amenity {
-  id: string;
-  name: string;
-  type: string;
-  waitTime: number;
-  statusColor: string;
-  distance?: string;
-}
+import { Amenity } from '@/types';
 
 interface FoodPickupModalProps {
   isOpen: boolean;
@@ -23,6 +15,8 @@ export function FoodPickupModal({ isOpen, onClose, onPreOrder, amenities }: Food
     <>
       {/* Backdrop */}
       <div 
+        role="presentation"
+        aria-hidden="true"
         className={cn(
           "fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300",
           isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
@@ -42,8 +36,8 @@ export function FoodPickupModal({ isOpen, onClose, onPreOrder, amenities }: Food
             <Coffee className="w-6 h-6 text-emerald-400" />
             Express Food
           </h2>
-          <button onClick={onClose} className="p-2 bg-neutral-800 rounded-full text-neutral-400 hover:text-white transition-colors">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} aria-label="Close Food Modal" className="p-2 bg-neutral-800 rounded-full text-neutral-400 hover:text-white transition-colors">
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 

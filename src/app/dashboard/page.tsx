@@ -1,26 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Coffee, Navigation, DoorOpen, Info, X, MapPin } from "lucide-react";
 import { StadiumMap } from "@/components/StadiumMap";
 import { Toast } from "@/components/Toast";
 import { collection, onSnapshot, QuerySnapshot, DocumentData } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { cn } from "@/lib/utils";
+import { Amenity } from "@/types";
 
 export default function Dashboard() {
   const [toastMessage, setToastMessage] = useState("");
   const [isToastVisible, setIsToastVisible] = useState(false);
   const [activeRoute, setActiveRoute] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<'food' | 'washroom' | null>(null);
-  const [amenities, setAmenities] = useState<any[] | null>(null);
+  const [amenities, setAmenities] = useState<Amenity[] | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
 
   useEffect(() => {
     // Real-time Firestore listener for live traffic/amenities
     const q = collection(db, 'amenities');
     const unsubscribe = onSnapshot(q, (snapshot: QuerySnapshot<DocumentData, DocumentData>) => {
-      const data = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      const data = snapshot.docs.map((doc: DocumentData) => ({ id: doc.id, ...doc.data() } as Amenity));
       setAmenities(data);
     }, (error: Error) => {
       console.error("Firestore error:", error);
@@ -31,12 +32,19 @@ export default function Dashboard() {
   // Simulation Effect Interval
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
+    const triggerSimulation = () => {
+      fetch('/api/simulate-traffic', { 
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`
+        }
+      }).catch(console.error);
+    };
+
     if (isSimulating) {
       // Instantly trigger once before interval
-      fetch('/api/simulate-traffic', { method: 'POST' }).catch(console.error);
-      intervalId = setInterval(() => {
-        fetch('/api/simulate-traffic', { method: 'POST' }).catch(console.error);
-      }, 8000);
+      triggerSimulation();
+      intervalId = setInterval(triggerSimulation, 8000);
     }
     return () => clearInterval(intervalId);
   }, [isSimulating]);
@@ -48,17 +56,17 @@ export default function Dashboard() {
     seat: "Row G, Seat 42"
   };
 
-  const handleWashroomClick = () => {
+  const handleWashroomClick = useCallback(() => {
     setActiveCategory('washroom');
     setActiveRoute(null);
-  };
+  }, []);
 
-  const handleFoodClick = () => {
+  const handleFoodClick = useCallback(() => {
     setActiveCategory('food');
     setActiveRoute(null);
-  };
+  }, []);
 
-  const handleAmenityClick = (amenity: any) => {
+  const handleAmenityClick = useCallback((amenity: Amenity) => {
     // Based on the amenity name, we determine the route ID to highlight on map
     if (amenity.name === "North Stand Washroom - Block C") {
       setActiveRoute("route-washroom-blockC");
@@ -74,9 +82,11 @@ export default function Dashboard() {
       setToastMessage(`Selected ${amenity.name}`);
       setIsToastVisible(true);
     }
-  };
+  }, []);
 
-  const filteredAmenities = amenities?.filter(a => a.type === activeCategory) || [];
+  const filteredAmenities = useMemo(() => {
+    return amenities?.filter(a => a.type === activeCategory) || [];
+  }, [amenities, activeCategory]);
 
   return (
     <div className="bg-black min-h-screen w-full font-sans">
@@ -120,8 +130,8 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <Navigation className="w-5 h-5 text-emerald-500" /> Live Map
             </h2>
-            <button className="p-1.5 bg-neutral-800 rounded-full text-neutral-400">
-              <Info className="w-4 h-4" />
+            <button className="p-1.5 bg-neutral-800 rounded-full text-neutral-400" aria-label="Stadium Map Information">
+              <Info className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
           <StadiumMap userSection={user.section} activeRoute={activeRoute} />
@@ -221,10 +231,10 @@ export default function Dashboard() {
         {activeCategory && (
           <section className="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
             <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
-              {activeCategory === 'food' ? <Coffee className="w-5 h-5 text-emerald-400" /> : <DoorOpen className="w-5 h-5 text-blue-400" />}
+              {activeCategory === 'food' ? <Coffee className="w-5 h-5 text-emerald-400" aria-hidden="true" /> : <DoorOpen className="w-5 h-5 text-blue-400" aria-hidden="true" />}
               {activeCategory === 'food' ? 'Express Food Options' : 'Nearest Washrooms'}
             </h2>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4" aria-live="polite" aria-atomic="true">
               {!amenities ? (
                 // Loading Skeleton
                 Array.from({ length: 2 }).map((_, i) => (

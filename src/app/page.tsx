@@ -4,7 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, QrCode, Ticket, Map as MapIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { JourneyMap } from "@/components/JourneyMap";
+import dynamic from "next/dynamic";
+
+const JourneyMap = dynamic(() => import("@/components/JourneyMap").then(mod => mod.JourneyMap), {
+  ssr: false,
+  loading: () => <div className="h-64 w-full flex items-center justify-center bg-neutral-900 border border-neutral-800 rounded-2xl animate-pulse"><p className="text-neutral-500 text-sm font-medium">Loading Map Directions...</p></div>
+});
 
 export default function LandingPage() {
   const [pnr, setPnr] = useState("");
@@ -30,8 +35,8 @@ export default function LandingPage() {
 
       <div className="w-full max-w-md z-10 flex flex-col items-center">
         {/* Logo / Header */}
-        <div className="w-20 h-20 bg-neutral-900 border border-neutral-800 rounded-2xl flex items-center justify-center mb-6 shadow-2xl shadow-emerald-900/20">
-          <Ticket className="w-10 h-10 text-emerald-400" />
+        <div className="w-20 h-20 bg-neutral-900 border border-neutral-800 rounded-2xl flex items-center justify-center mb-6 shadow-2xl shadow-emerald-900/20" aria-label="MatchRoute Ticket Logo">
+          <Ticket className="w-10 h-10 text-emerald-400" aria-hidden="true" />
         </div>
         <h1 className="text-4xl font-bold tracking-tight mb-2 text-center">
           Match<span className="text-emerald-400">Route</span>
@@ -58,12 +63,14 @@ export default function LandingPage() {
                 setError(false);
               }}
               placeholder="e.g. RCB123"
+              aria-invalid={error}
+              aria-describedby={error ? "pnr-error" : undefined}
               className={cn(
                 "w-full bg-neutral-950 border px-4 py-3 rounded-xl outline-none transition-all text-lg placeholder:text-neutral-600",
                 error ? "border-red-500/50 focus:border-red-500" : "border-neutral-800 focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20"
               )}
             />
-            {error && <p className="text-red-400 text-sm mt-2 font-medium">Invalid PNR. Try 'RCB123'.</p>}
+            {error && <p id="pnr-error" className="text-red-400 text-sm mt-2 font-medium" role="alert">Invalid PNR. Try &apos;RCB123&apos;.</p>}
           </div>
 
           <button
@@ -84,7 +91,7 @@ export default function LandingPage() {
             type="submit"
             className="w-full bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-semibold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] mt-2"
           >
-            Enter Stadium <ArrowRight className="w-5 h-5" />
+            Enter Stadium <ArrowRight className="w-5 h-5" aria-hidden="true" />
           </button>
           
           <div className="flex items-center gap-4 my-2">
