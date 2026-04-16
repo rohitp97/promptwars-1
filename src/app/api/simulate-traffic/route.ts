@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, message: 'Traffic simulated' });
   } catch (error: unknown) {
-    console.error('Simulation error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }

@@ -24,7 +24,7 @@ export default function Dashboard() {
       const data = snapshot.docs.map((doc: DocumentData) => ({ id: doc.id, ...doc.data() } as Amenity));
       setAmenities(data);
     }, (error: Error) => {
-      console.error("Firestore error:", error);
+      // Setup fails gracefully in UI via timeout masks
     });
     return () => unsubscribe();
   }, []);
@@ -38,7 +38,7 @@ export default function Dashboard() {
         headers: {
           'Authorization': `Bearer ${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`
         }
-      }).catch(console.error);
+      }).catch(() => { /* Silent fail for live demo */ });
     };
 
     if (isSimulating) {
