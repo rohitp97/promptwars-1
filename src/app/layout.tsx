@@ -16,6 +16,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MatchRoute - AI Stadium Navigation",
   description: "Navigate stadiums safely with real-time route optimization and AI-driven amenity traffic prediction.",
+  manifest: "/manifest.json",
+  themeColor: "#10b981",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MatchRoute",
+  },
 };
 
 export default function RootLayout({

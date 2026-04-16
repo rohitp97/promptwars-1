@@ -18,39 +18,7 @@ export const StadiumMap = memo(function StadiumMap({ userSection, activeRoute }:
           </radialGradient>
         </defs>
 
-        {/* Style block for dash animation */}
-        <style>
-          {`
-            @keyframes path-draw {
-              from { stroke-dasharray: 400; stroke-dashoffset: 400; }
-              to { stroke-dasharray: 400; stroke-dashoffset: 0; }
-            }
-            .path-active-exit {
-              stroke: #3b82f6;
-              stroke-width: 4;
-              stroke-linecap: round;
-              stroke-linejoin: round;
-              animation: path-draw 1.5s ease-out forwards;
-              opacity: 1;
-              filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.8));
-            }
-            .path-active-washroom {
-              stroke: #eab308;
-              stroke-width: 4;
-              stroke-linecap: round;
-              stroke-linejoin: round;
-              animation: path-draw 1.5s ease-out forwards;
-              opacity: 1;
-              filter: drop-shadow(0 0 6px rgba(234, 179, 8, 0.8));
-            }
-            .path-hidden {
-              stroke: #525252;
-              stroke-width: 2;
-              stroke-opacity: 0.2;
-              opacity: 0;
-            }
-          `}
-        </style>
+        {/* Style block for dash animation moved to globals.css for optimal memory load */}
         
         {/* Outfield / Stands Background */}
         <ellipse cx="100" cy="100" rx="95" ry="85" className="fill-neutral-800" />

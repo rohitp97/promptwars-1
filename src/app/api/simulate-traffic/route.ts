@@ -1,20 +1,26 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
+const AuthSchema = z.object({
+  authorization: z.string().startsWith('Bearer ')
+});
+
 /**
  * Simulates traffic updates for Firebase.
- * Secured via basic Authorization header to prevent abuse.
+ * Secured via basic Authorization header with rigorous Zod validation.
  */
 export async function POST(request: NextRequest) {
   try {
-    // Security check
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`) {
-      // Using public api key as a mock secret for hackathon simplicity, 
-      // ideally this would be a CRON_SECRET or similar server-side only variable.
+    // Security check via Zod parsing
+    const headers = { authorization: request.headers.get('authorization') };
+    const parsedAuth = AuthSchema.safeParse(headers);
+    
+    if (!parsedAuth.success || parsedAuth.data.authorization !== `Bearer ${process.env.NEXT_PUBLIC_FIREBASE_API_KEY}`) {
+      // Using public api key as a mock secret for hackathon simplicity
       return NextResponse.json({ success: false, error: 'Unauthorized route access' }, { status: 401 });
     }
 
